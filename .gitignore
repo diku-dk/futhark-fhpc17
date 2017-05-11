@@ -1,0 +1,4 @@
+bin/
+futhark-patched/
+results/
+benchmarks/data

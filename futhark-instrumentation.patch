@@ -1,0 +1,58 @@
+diff --git a/src/Futhark/Pass/ExtractKernels.hs b/src/Futhark/Pass/ExtractKernels.hs
+index e1a0a246..a6e5762b 100644
+--- a/src/Futhark/Pass/ExtractKernels.hs
++++ b/src/Futhark/Pass/ExtractKernels.hs
+@@ -794,12 +794,24 @@ maybeDistributeStm bnd@(Let pat _ (Op (Scanomap cs w lam fold_lam nes arrs))) ac
+     _ ->
+       addStmToKernel bnd acc
+ 
++maybeDistributeStm bnd acc
++  | reduceOrRedomap bnd, "FUTHARK_MAP_WITH_LOOP" `elem` map fst unixEnvironment =
++  addStmToKernel bnd acc
++  where reduceOrRedomap (Let _ _ (Op Redomap{})) = True
++        reduceOrRedomap (Let _ _ (Op Reduce{})) = True
++        reduceOrRedomap _ = False
++
++
+ -- If the reduction can be distributed by itself, we will turn it into a
+ -- segmented reduce.
+ --
+ -- If the reduction cannot be distributed by itself, it will be
+ -- sequentialised in the default case for this function.
+-maybeDistributeStm bnd@(Let pat _ (Op (Redomap cs w comm lam foldlam nes arrs))) acc | versionedCode =
++maybeDistributeStm bnd@(Let pat _ (Op (Redomap cs w comm lam foldlam nes arrs))) acc
++  | "FUTHARK_LARGE_KERNEL" `elem` map fst unixEnvironment
++    || "FUTHARK_SMALL_KERNEL" `elem` map fst unixEnvironment
++    || "FUTHARK_SEGMENTED_REDOMAP" `elem` map fst unixEnvironment ||
++    versionedCode =
+   distributeSingleStm acc bnd >>= \case
+     Just (kernels, res, nest, acc')
+       | Just (perm, pat_unused) <- permutationAndMissing pat res ->
+diff --git a/src/Futhark/Pass/ExtractKernels/Segmented.hs b/src/Futhark/Pass/ExtractKernels/Segmented.hs
+index 27098500..bed9f39e 100644
+--- a/src/Futhark/Pass/ExtractKernels/Segmented.hs
++++ b/src/Futhark/Pass/ExtractKernels/Segmented.hs
+@@ -18,6 +18,7 @@ import Futhark.Representation.Kernels
+ import Futhark.MonadFreshNames
+ import Futhark.Tools
+ import Futhark.Pass.ExtractKernels.BlockedKernel
++import Futhark.Util
+ 
+ data SegmentedVersion = OneGroupOneSegment
+                       | ManyGroupsOneSegment
+@@ -165,8 +166,14 @@ regularSegmentedRedomap segment_size num_segments _nest_sizes flat_pat
+   -- if (group_size/2) < segment_size, means that we will not be able to fit two
+   -- segments into one group, and therefore we should not use the kernel that
+   -- relies on this.
+-  e <- eIf (eCmpOp (CmpSlt Int32) (eBinOp (SQuot Int32) (eSubExp group_size) (eSubExp two))
++  let use_large_kernel
++        | "FUTHARK_LARGE_KERNEL" `elem` map fst unixEnvironment =
++            eSubExp $ constant True
++        | "FUTHARK_SMALL_KERNEL" `elem` map fst unixEnvironment =
++            eSubExp $ constant False
++        | otherwise = (eCmpOp (CmpSlt Int32) (eBinOp (SQuot Int32) (eSubExp group_size) (eSubExp two))
+                                   (eSubExp segment_size))
++  e <- eIf use_large_kernel
+          (eBody [e_large_seg])
+          (mkBodyM small_stms small_ses)
+ 
