@@ -14,6 +14,7 @@
 -- input @ data/i32_2pow24_2pow2
 -- input @ data/i32_2pow26_2pow0
 --
+--
 -- input @ data/i32_2pow0_2pow18
 -- input @ data/i32_2pow2_2pow16
 -- input @ data/i32_2pow4_2pow14
@@ -25,6 +26,23 @@
 -- input @ data/i32_2pow16_2pow2
 -- input @ data/i32_2pow18_2pow0
 
-let main [m] [n] (xss : [m][n]i32) : [m]i32 =
-  let xss' = map (\xs -> scan (+) 0.0i32 xs) xss
-  in xss'[:,n-1]
+import "/futlib/math"
+
+type quad = (i32,i32,i32,i32)
+
+let redOp((bx, lx, rx, tx): quad)
+         ((by, ly, ry, ty): quad): quad =
+  ( i32.max bx (i32.max by (rx + ly))
+  , i32.max lx (tx+ly)
+  , i32.max ry (rx+ty)
+  , tx + ty)
+
+let mapOp (x: i32): quad =
+  ( i32.max x 0, i32.max x 0, i32.max x 0, x)
+
+let mss [n] (xs: [n]i32): [n]i32 =
+  let (x, _, _, _) = unzip (scan redOp (0,0,0,0) (map mapOp xs))
+  in x
+
+let main [m][n] (xss: [m][n]i32) =
+  (map mss xss)[:,n-1]
