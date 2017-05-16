@@ -26,22 +26,10 @@
 -- input @ data/i32_2pow16_2pow2
 -- input @ data/i32_2pow18_2pow0
 
-import "/futlib/math"
-
-type quad = (i32,i32,i32,i32)
-
-let redOp((bx, lx, rx, tx): quad)
-         ((by, ly, ry, ty): quad): quad =
-  ( i32.max bx (i32.max by (rx + ly))
-  , i32.max lx (tx+ly)
-  , i32.max ry (rx+ty)
-  , tx + ty)
-
-let mapOp (x: i32): quad =
-  ( i32.max x 0, i32.max x 0, i32.max x 0, x)
+import "operations"
 
 let mss [n] (xs: [n]i32): [n]i32 =
-  let (x, _, _, _) = unzip (scan redOp (0,0,0,0) (map mapOp xs))
+  let (x, _, _, _) = unzip (scan mss.redop mss.ne (map mss.mapop xs))
   in x
 
 let main [m][n] (xss: [m][n]i32) =

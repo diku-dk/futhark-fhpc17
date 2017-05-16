@@ -25,7 +25,7 @@
 -- input @ data/i32_2pow16_2pow2
 -- input @ data/i32_2pow18_2pow0
 
-let sum [n] (xs: [n]i32): i32 = reduce (+) 0 xs
+import "operations"
 
 let main [m] [n] (xss : [m][n]i32) : [m]i32 =
   map sum xss

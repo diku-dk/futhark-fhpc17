@@ -3,13 +3,14 @@ export OPENCL_PLATFORM?=NVIDIA
 
 .SECONDARY:
 
-all: bin/futhark-opencl benchmarks/data sum_results mss_results
+all: bin/futhark-opencl benchmarks/data sum_results mss_results intense_results
 
 %_results:
 	@./mkbench.sh $*
 	@true
 
 bin/futhark-opencl: futhark-patched
+	mkdir -p bin
 	cd futhark-patched && stack setup
 	cd futhark-patched && stack build
 	cp `cd futhark-patched && stack exec which futhark-opencl` $@

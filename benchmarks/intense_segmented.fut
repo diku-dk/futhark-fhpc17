@@ -14,7 +14,6 @@
 -- input @ data/i32_2pow24_2pow2
 -- input @ data/i32_2pow26_2pow0
 --
---
 -- input @ data/i32_2pow0_2pow18
 -- input @ data/i32_2pow2_2pow16
 -- input @ data/i32_2pow4_2pow14
@@ -28,5 +27,5 @@
 
 import "operations"
 
-let main [m][n] (xss: [m][n]i32) =
-  map mss xss
+let main [m] [n] (xss : [m][n]i32) : [m]i32 =
+  map intense xss

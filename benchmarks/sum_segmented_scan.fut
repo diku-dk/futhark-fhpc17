@@ -25,6 +25,8 @@
 -- input @ data/i32_2pow16_2pow2
 -- input @ data/i32_2pow18_2pow0
 
+import "operations"
+
 let main [m] [n] (xss : [m][n]i32) : [m]i32 =
-  let xss' = map (\xs -> scan (+) 0 xs) xss
+  let xss' = map (\xs -> scan sum.redop 0 xs) xss
   in xss'[:,n-1]
