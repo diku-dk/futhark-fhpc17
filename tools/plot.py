@@ -21,7 +21,9 @@ common_data_sets={"2pow26": mk_data_sets(26),
                   "2pow18": mk_data_sets(18)
 }
 
-benchmarks=[('sum', 'Segmented sum', 'i32', common_data_sets)]
+benchmarks=[('sum', 'Segmented sum', 'i32', common_data_sets),
+            ('mss', 'MSS', 'i32', common_data_sets),
+            ('intense', 'Intensive', 'i32', common_data_sets)]
 
 variants=[('segmented_auto', 'segmented', "Automatic"),
           ('segmented_large', 'segmented', "Large"),
