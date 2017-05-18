@@ -28,5 +28,5 @@
 import "operations"
 
 let main [m] [n] (xss : [m][n]i32) : [m]i32 =
-  let xss' = map (\xs -> scan sum.redop sum.ne xs) xss
+  let (_, xss') = unzip (map (\xs -> scan index_of_max.redop index_of_max.ne (zip xs (iota n))) xss)
   in xss'[:,n-1]

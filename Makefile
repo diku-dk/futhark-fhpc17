@@ -3,7 +3,7 @@ export OPENCL_PLATFORM?=NVIDIA
 
 .SECONDARY:
 
-all: bin/futhark-opencl benchmarks/data sum_results mss_results intense_results
+all: bin/futhark-opencl benchmarks/data sum_results mss_results intense_results index_of_max_results blackscholes_results
 
 %_results:
 	@./mkbench.sh $*
@@ -14,6 +14,7 @@ bin/futhark-opencl: futhark-patched
 	cd futhark-patched && stack setup
 	cd futhark-patched && stack build
 	cp `cd futhark-patched && stack exec which futhark-opencl` $@
+	cp `cd futhark-patched && stack exec which futhark` $@
 
 futhark-patched:
 	git clone --depth 1 https://github.com/HIPERFIT/futhark futhark-patched

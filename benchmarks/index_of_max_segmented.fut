@@ -28,5 +28,4 @@
 import "operations"
 
 let main [m] [n] (xss : [m][n]i32) : [m]i32 =
-  let xss' = map (\xs -> scan sum.redop sum.ne xs) xss
-  in xss'[:,n-1]
+  map index_of_max xss
