@@ -21,9 +21,9 @@ generate() {
     futhark-dataset --binary -g "[$n]i32" > "$file"
 }
 
-# generate 26
+generate 26
 
-# generate 18
+generate 18
 
 blackscholes() {
     k=$1

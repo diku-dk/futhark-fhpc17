@@ -23,7 +23,6 @@ common_data_sets={"2pow26": mk_data_sets(26),
 
 benchmarks=[('sum', 'Segmented sum', 'i32', common_data_sets),
             ('mss', 'MSS', 'i32', common_data_sets),
-            ('intense', 'Intensive', 'i32', common_data_sets),
             ('index_of_max', 'Index of maximum', 'i32', common_data_sets),
             ('blackscholes', 'Black-Scholes', 'blackscholes', common_data_sets)]
 
@@ -39,16 +38,20 @@ def data_file(benchmark, variant, group_size):
     variant = '_' + variant if variant != None else ''
     return 'results/{}{}_groupsize_{}.json'.format(benchmark, variant, group_size)
 
-def ylimit(benchmark, ylims):
-    limits = {'sum': 4,
+def ylimit(benchmark, work, ylims):
+    limits = {'sum': {'2pow18': 4,
+                      '2pow26': 32},
 
-              'index_of_max': 10,
+              'index_of_max': {'2pow18': 4,
+                               '2pow26': 40},
 
-              'mss': 10,
+              'mss': {'2pow18': 6,
+                      '2pow26': 65},
 
-              'blackscholes': 5}
+              'blackscholes': {'2pow18': 2,
+                               '2pow26': 50}}
     try:
-        return limits[benchmark]
+        return limits[benchmark][work]
     except KeyError:
         ylims.sort()
         return ylims[-2]*1.2
@@ -56,6 +59,9 @@ def ylimit(benchmark, ylims):
 for group_size in [128, 512, 1024]:
     for benchmark, benchmark_name, benchmark_data, benchmark_data_sets in benchmarks:
         for work in benchmark_data_sets:
+            filename = '{}/{}_{}_group_size_{}.pdf'.format(outputdir, benchmark, work, group_size)
+            print ('Building {}...'.format(filename))
+
             fig, ax = plt.subplots()
             ax.set_ylabel('Runtime (ms)')
             ax.set_xlabel('Data set')
@@ -87,7 +93,7 @@ for group_size in [128, 512, 1024]:
             grey='#aaaaaa'
 
             ylims.sort()
-            ax.set_ylim([0,ylimit(benchmark, ylims)])
+            ax.set_ylim([0,ylimit(benchmark, work, ylims)])
             ax.yaxis.grid(color=grey,zorder=0)
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
@@ -95,5 +101,4 @@ for group_size in [128, 512, 1024]:
             ax.set_xticklabels(xticks, rotation=-45)
 
             plt.rc('text')
-            plt.savefig('{}/{}_{}_group_size_{}.pdf'.format(outputdir, benchmark, work, group_size),
-                        bbox_inches='tight')
+            plt.savefig(filename, bbox_inches='tight')
