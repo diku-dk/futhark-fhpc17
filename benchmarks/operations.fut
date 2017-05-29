@@ -83,4 +83,4 @@ module blackscholes = {
 }
 
 let blackscholes (r: f32) (v: f32) (days: i32): f32 =
-  reduce_comm blackscholes.redop.blackschoes.ne (map (blackscholes.mapop r v days) (iota days))
+  reduce_comm blackscholes.redop blackscholes.ne (map (blackscholes.mapop r v days) (iota days))
