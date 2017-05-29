@@ -26,11 +26,11 @@ benchmarks=[('sum', 'Segmented sum', 'i32', common_data_sets),
             ('index_of_max', 'Index of maximum', 'i32', common_data_sets),
             ('blackscholes', 'Black-Scholes', 'blackscholes', common_data_sets)]
 
-variants=[('segmented_auto', 'segmented', "Automatic"),
-          ('segmented_large', 'segmented', "Large"),
-          ('segmented_small', 'segmented', "Small"),
-          ('segmented_map_with_loop', 'segmented', "Map-with-loop"),
-          ('segmented_scan', 'segmented_scan', "Segmented scan")]
+variants=[('segmented_large', '_segmented', "Large"),
+          ('segmented_small', '_segmented', "Small"),
+          ('segmented_map_with_loop', '_segmented', "Map-with-loop"),
+          ('segmented_scan', '_segmented_scan', "Segmented scan"),
+          ('segmented_auto', '_segmented', "Automatic"),]
 
 markers=['x', 'p', 'o', 'v', '+', 'D']
 
@@ -70,10 +70,26 @@ for group_size in [128, 512, 1024]:
             for (num_segments,segment_size) in benchmark_data_sets[work]:
                 xticks += ['[{}][{}]'.format(num_segments,segment_size)]
 
+            # Add non-segmented baseline.
+            xs=[]
+            ys=[]
+            f_json = json.load(open(data_file(benchmark, None, group_size)))
+            results = f_json['benchmarks/{}.fut'.format(benchmark)]
+            i = 0
+            for (num_segments,segment_size) in benchmark_data_sets[work]:
+                dk = 'data/{}_{}'.format(benchmark_data, work)
+                r = results['datasets'][dk]
+                ms = np.mean(r['runtimes'])/1000.0
+                xs += [i]
+                ys += [ms]
+                i += 1
+            ax.plot(xs,ys,label='Non-segmented',marker='')
+
+            # Now add the segmented runtimes.
             ylims=[]
             for marker, (variant, variant_file, variant_desc) in zip(markers, variants):
                 f_json = json.load(open(data_file(benchmark, variant, group_size)))
-                results = f_json['benchmarks/{}_{}.fut'.format(benchmark, variant_file)]
+                results = f_json['benchmarks/{}{}.fut'.format(benchmark, variant_file)]
 
                 xs=[]
                 ys=[]

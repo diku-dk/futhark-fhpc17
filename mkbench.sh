@@ -22,7 +22,7 @@ for group_size in $group_sizes; do
         echo "results/${benchmark}${1}_groupsize_${group_size}.json"
     }
 
-    echo "Reduction baseline:"
+    echo "Non-segmented baseline:"
     ${futhark_bench} benchmarks/${benchmark}.fut --json $(json)
 
     echo "With segmented scan:"

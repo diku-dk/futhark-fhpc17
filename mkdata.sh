@@ -37,6 +37,11 @@ blackscholes() {
         (futhark-dataset --binary -g "[$segments]f32" -g "[$segments]f32"; echo "$segsize") > "$file"
         logsegments=$(($logsegments + 2))
     done
+
+    file="benchmarks/data/blackscholes_2pow${k}"
+    echo "Generating $file"
+    n=$((2**$k))
+    (futhark-dataset --binary -g f32 -g f32 --i32-bounds "$n:$n" -g i32) > "$file"
 }
 
 blackscholes 26

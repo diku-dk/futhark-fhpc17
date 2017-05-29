@@ -1,6 +1,6 @@
 -- ==
--- input { 0.08f32 0.3f32 67108864 }
--- input { 0.08f32 0.3f32 262144 }
+-- input @ data/blackscholes_2pow18
+-- input @ data/blackscholes_2pow26
 
 import "operations"
 

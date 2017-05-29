@@ -26,40 +26,6 @@ let index_of_max [n] (xs: [n]i32): i32 =
   let (_, i) = reduce_comm index_of_max.redop index_of_max.ne (zip xs (iota n))
   in i
 
-module intense = {
-  let redop (x : i32) (y : i32): i32 =
-    let xx = f32 x * f32 x
-    let x = i32 (f32.sqrt(xx))
-
-    let xx = f32 x * f32 x
-    let x = i32 (f32.sqrt(xx))
-
-    let xx = f32 x * f32 x
-    let x = i32 (f32.sqrt(xx))
-
-    let xx = f32 x * f32 x
-    let x = i32 (f32.sqrt(xx))
-
-    let xx = f32 x * f32 x
-    let x = i32 (f32.sqrt(xx))
-
-    let xx = f32 x * f32 x
-    let x = i32 (f32.sqrt(xx))
-
-    let xx = f32 x * f32 x
-    let x = i32 (f32.sqrt(xx))
-
-    let xx = f32 x * f32 x
-    let x = i32 (f32.sqrt(xx))
-
-    in x + y
-
-  let ne = 0
-}
-
-let intense [n] (xs: [n]i32): i32 =
-  reduce_comm intense.redop intense.ne xs
-
 module mss = {
   type quad = (i32,i32,i32,i32)
 
@@ -117,4 +83,4 @@ module blackscholes = {
 }
 
 let blackscholes (r: f32) (v: f32) (days: i32): f32 =
-  reduce_comm blackscholes.redop blackscholes.ne (map (blackscholes.mapop r v days) (iota days))
+  reduce_comm blackscholes.redop.blackschoes.ne (map (blackscholes.mapop r v days) (iota days))
