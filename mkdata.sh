@@ -9,15 +9,15 @@ generate() {
         logsegsize=$(($k-$logsegments))
         file="benchmarks/data/i32_2pow${logsegments}_2pow${logsegsize}"
         echo "Generating $file"
-        segments=$((2**$logsegments))
-        segsize=$((2**$logsegsize))
+        segments=$(echo 2^$logsegments | bc)
+        segsize=$(echo 2^$logsegsize | bc)
         futhark-dataset --binary -g "[$segments][$segsize]i32" > "$file"
         logsegments=$(($logsegments + 2))
     done
 
     file="benchmarks/data/i32_2pow${k}"
     echo "Generating $file"
-    n=$((2**$k))
+    n=$(echo 2^$k | bc)
     futhark-dataset --binary -g "[$n]i32" > "$file"
 }
 
@@ -32,15 +32,15 @@ blackscholes() {
         logsegsize=$(($k-$logsegments))
         file="benchmarks/data/blackscholes_2pow${logsegments}_2pow${logsegsize}"
         echo "Generating $file"
-        segments=$((2**$logsegments))
-        segsize=$((2**$logsegsize))
+        segments=$(echo 2^$logsegments | bc)
+        segsize=$(echo 2^$logsegsize | bc)
         (futhark-dataset --binary -g "[$segments]f32" -g "[$segments]f32"; echo "$segsize") > "$file"
         logsegments=$(($logsegments + 2))
     done
 
     file="benchmarks/data/blackscholes_2pow${k}"
     echo "Generating $file"
-    n=$((2**$k))
+    n=$(echo 2^$k | bc)
     (futhark-dataset --binary -g f32 -g f32 --i32-bounds "$n:$n" -g i32) > "$file"
 }
 
