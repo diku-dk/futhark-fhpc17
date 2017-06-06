@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import numpy as np
 import sys
@@ -26,13 +27,14 @@ benchmarks=[('sum', 'Segmented sum', 'i32', common_data_sets),
             ('index_of_max', 'Index of maximum', 'i32', common_data_sets),
             ('blackscholes', 'Black-Scholes', 'blackscholes', common_data_sets)]
 
-variants=[('segmented_large', '_segmented', "Large"),
-          ('segmented_small', '_segmented', "Small"),
-          ('segmented_map_with_loop', '_segmented', "Map-with-loop"),
+variants=[('segmented_large', '_segmented', "Large segments"),
+          ('segmented_small', '_segmented', "Small segments"),
+          ('segmented_map_with_loop', '_segmented', "Sequential segments"),
           ('segmented_scan', '_segmented_scan', "Segmented scan"),
-          ('segmented_auto', '_segmented', "Automatic"),]
+          ('segmented_auto', '_segmented', "Automatic"),
+]
 
-markers=['x', 'p', 'o', 'v', '+', 'D']
+markers=['x', 'p', '|', 'v', '*', 'D']
 
 def data_file(benchmark, variant, group_size):
     variant = '_' + variant if variant != None else ''
@@ -43,7 +45,7 @@ def ylimit(benchmark, work, ylims):
                       '2pow26': 32},
 
               'index_of_max': {'2pow18': 4,
-                               '2pow26': 40},
+                               '2pow26': 50},
 
               'mss': {'2pow18': 6,
                       '2pow26': 65},
@@ -68,8 +70,12 @@ for group_size in [128, 512, 1024]:
 
             xticks = []
             for (num_segments,segment_size) in benchmark_data_sets[work]:
-                xticks += ['[{}][{}]'.format(num_segments,segment_size)]
-
+                # Ugly hack to get superscript labels - could not get the pseudo-TeX to work.
+                def powlabel(s):
+                    base,exp = unicode(s).split('pow')
+                    exp = exp.replace(u'0', u'⁰').replace(u'1', u'¹').replace(u'2', u'²').replace(u'4', u'⁴').replace(u'6', u'⁶').replace(u'8', u'⁸')
+                    return base + exp
+                xticks += [(u'[{}][{}]').format(powlabel(num_segments),powlabel(segment_size))]
             # Add non-segmented baseline.
             xs=[]
             ys=[]
@@ -83,7 +89,7 @@ for group_size in [128, 512, 1024]:
                 xs += [i]
                 ys += [ms]
                 i += 1
-            ax.plot(xs,ys,label='Non-segmented',marker='')
+            ax.plot(xs,ys,label='Non-segmented',marker='',linewidth=3,color='black',ls='dashed')
 
             # Now add the segmented runtimes.
             ylims=[]
@@ -104,7 +110,7 @@ for group_size in [128, 512, 1024]:
                             ys += [ms]
                     i += 1
                 ylims += [np.max(ys)]
-                ax.plot(xs,ys,label=variant_desc,marker=marker)
+                ax.plot(xs,ys,label=variant_desc,marker=marker,linewidth=3,markersize=15)
 
             grey='#aaaaaa'
 
@@ -113,8 +119,8 @@ for group_size in [128, 512, 1024]:
             ax.yaxis.grid(color=grey,zorder=0)
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
-            ax.set_xticks(1+np.arange(len(xticks)))
-            ax.set_xticklabels(xticks, rotation=-45)
+            ax.set_xticks(np.arange(len(xticks)))
+            ax.set_xticklabels(xticks, rotation=-45,size='large')
 
             plt.rc('text')
             plt.savefig(filename, bbox_inches='tight')

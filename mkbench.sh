@@ -4,10 +4,11 @@ set -e
 set -x
 
 benchmark=$1
+shift
+group_sizes=$*
 
 OPENCL_PLATFORM=${OPENCL_PLATFORM:-NVIDIA}
-group_sizes='128 512 1024'
-timeout=30 # seconds
+timeout=45 # seconds
 
 echo "Benchmarking $1"
 

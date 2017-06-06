@@ -1,8 +1,10 @@
 -- ==
--- input @ data/blackscholes_2pow18
--- input @ data/blackscholes_2pow26
+-- compiled input @ inputs/blackscholes_2pow18
+-- output @ blackscholes_expected/blackscholes_2pow18
+-- compiled input @ inputs/blackscholes_2pow26
+-- output @ blackscholes_expected/blackscholes_2pow26
 
 import "operations"
 
-let main (r: f32) (v: f32) (days: i32): f32 =
+let main (r: f64) (v: f64) (days: i32): f64 =
   blackscholes r v days
