@@ -1,6 +1,8 @@
 -- ==
--- input @ data/i32_2pow26
--- input @ data/i32_2pow18
+-- compiled input @ inputs/i32_2pow26
+-- output @ mss_expected/i32_2pow26
+-- compiled input @ inputs/i32_2pow18
+-- output @ mss_expected/i32_2pow18
 
 import "operations"
 

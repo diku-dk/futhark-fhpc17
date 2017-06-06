@@ -2,6 +2,8 @@
 
 set -e
 
+i32bounds="-5:5"
+
 generate() {
     k=$1
     logsegments=0
@@ -11,14 +13,14 @@ generate() {
         echo "Generating $file"
         segments=$(echo 2^$logsegments | bc)
         segsize=$(echo 2^$logsegsize | bc)
-        futhark-dataset --binary -g "[$segments][$segsize]i32" > "$file"
+        futhark-dataset --binary --i32-bounds="$i32bounds" -g "[$segments][$segsize]i32" > "$file"
         logsegments=$(($logsegments + 2))
     done
 
     file="benchmarks/inputs/i32_2pow${k}"
     echo "Generating $file"
     n=$(echo 2^$k | bc)
-    futhark-dataset --binary -g "[$n]i32" > "$file"
+    futhark-dataset --binary --i32-bounds="$i32bounds" -g "[$n]i32" > "$file"
 }
 
 generate 26

@@ -3,12 +3,12 @@ export OPENCL_PLATFORM?=NVIDIA
 
 .SECONDARY:
 
-all: bin/futhark-opencl benchmarks/data sum_results mss_results index_of_max_results blackscholes_results
+all: bin/futhark-opencl benchmarks/inputs sum_results mss_results index_of_max_results blackscholes_results
 
 # For sum we want to try three different workgroup sizes; the others
 # will have to make do with 512.
-sum_results: bin/futhark-opencl benchmarks/%_expected
-	./mkbench.sh $* 128 512 1024
+sum_results: bin/futhark-opencl benchmarks/sum_expected
+	./mkbench.sh sum 128 512 1024
 
 %_results: bin/futhark-opencl benchmarks/%_expected
 	./mkbench.sh $* 512
