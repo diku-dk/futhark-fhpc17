@@ -1,9 +1,11 @@
 export FUTHARK_OPENCL=bin/futhark-opencl
 export OPENCL_PLATFORM?=NVIDIA
 
+CUB_PATH?=$(HOME)/cub-1.7.0
+
 .SECONDARY:
 
-all: bin/futhark-opencl benchmarks/inputs sum_results mss_results index_of_max_results blackscholes_results
+all: bin/futhark-opencl benchmarks/inputs sum_results mss_results index_of_max_results blackscholes_results results/cub
 
 # For sum we want to try three different workgroup sizes; the others
 # will have to make do with 512.
@@ -34,5 +36,18 @@ benchmarks/data:
 	mkdir -p benchmarks/data
 	./mkdata.sh || rm -rf benchmarks/data
 
+
+results/sum_segmented_cub.json: cub/sum_segmented cub.sh
+	./cub.sh sum_segmented
+
+cub/sum_segmented: cub/sum_segmented.cu
+	nvcc -o $@ $< -O3 -I$(CUB_PATH)
+
+results/index_of_max_segmented_cub.json: cub/index_of_max_segmented cub.sh
+	./cub.sh index_of_max_segmented
+
+cub/index_of_max_segmented: cub/index_of_max_segmented.cu
+	nvcc -o $@ $< -O3 -I$(CUB_PATH)
+
 clean:
-	rm -rf benchmarks/data results futhark-patched bin
+	rm -rf benchmarks/data results futhark-patched bin cub/sum_segmented

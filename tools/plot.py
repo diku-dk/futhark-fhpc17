@@ -50,16 +50,17 @@ def ylimit(benchmark, work, ylims):
               'mss': {'2pow18': 6,
                       '2pow26': 65},
 
-              'blackscholes': {'2pow18': 2,
-                               '2pow26': 50}}
+              'blackscholes': {'2pow18': 4,
+                               '2pow26': 100}}
     try:
         return limits[benchmark][work]
     except KeyError:
         ylims.sort()
         return ylims[-2]*1.2
 
-for group_size in [128, 512, 1024]:
-    for benchmark, benchmark_name, benchmark_data, benchmark_data_sets in benchmarks:
+for benchmark, benchmark_name, benchmark_data, benchmark_data_sets in benchmarks:
+    group_sizes = [128, 512, 1024] if benchmark == 'sum' else [512]
+    for group_size in group_sizes:
         for work in benchmark_data_sets:
             filename = '{}/{}_{}_group_size_{}.pdf'.format(outputdir, benchmark, work, group_size)
             print ('Building {}...'.format(filename))
@@ -83,13 +84,30 @@ for group_size in [128, 512, 1024]:
             results = f_json['benchmarks/{}.fut'.format(benchmark)]
             i = 0
             for (num_segments,segment_size) in benchmark_data_sets[work]:
-                dk = 'data/{}_{}'.format(benchmark_data, work)
+                dk = 'inputs/{}_{}'.format(benchmark_data, work)
                 r = results['datasets'][dk]
                 ms = np.mean(r['runtimes'])/1000.0
                 xs += [i]
                 ys += [ms]
                 i += 1
             ax.plot(xs,ys,label='Non-segmented',marker='',linewidth=3,color='black',ls='dashed')
+
+            # Add CUB version if it exists.
+            try:
+                f_json = json.load(open('results/{}_segmented_cub.json'.format(benchmark)))
+                i = 0
+                xs=[]
+                ys=[]
+                for (num_segments,segment_size) in benchmark_data_sets[work]:
+                    dk = 'inputs/{}_{}_{}'.format(benchmark_data, num_segments, segment_size)
+                    if len(f_json[dk]) > 0:
+                        ms=float(f_json[dk])/1000
+                        xs += [i]
+                        ys += [ms]
+                    i += 1
+                ax.plot(xs,ys,label='CUB',marker='D',linewidth=3,color='#30d62a')
+            except IOError:
+                pass
 
             # Now add the segmented runtimes.
             ylims=[]
@@ -101,13 +119,12 @@ for group_size in [128, 512, 1024]:
                 ys=[]
                 i = 0
                 for (num_segments,segment_size) in benchmark_data_sets[work]:
-                    dk = 'data/{}_{}_{}'.format(benchmark_data, num_segments, segment_size)
+                    dk = 'inputs/{}_{}_{}'.format(benchmark_data, num_segments, segment_size)
                     r = results['datasets'][dk]
                     if type(r) is dict:
                         ms = np.mean(r['runtimes'])/1000.0
-                        if ms > 0.01: # sanity check
-                            xs += [i]
-                            ys += [ms]
+                        xs += [i]
+                        ys += [ms]
                     i += 1
                 ylims += [np.max(ys)]
                 ax.plot(xs,ys,label=variant_desc,marker=marker,linewidth=3,markersize=15)
