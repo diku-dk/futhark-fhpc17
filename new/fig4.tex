@@ -1,0 +1,103 @@
+\documentclass[crop,tikz]{standalone}
+
+\input{fig-preamble}
+
+\begin{document}
+
+% #1 = ymax
+% #2 = yrestrict (cutoff)
+% #3 = size of performance test
+% #4 = data table
+% #5 = table containing labels
+\newcommand{\rwlplotb}[5]{
+\pgfplotstabletranspose[colnames from=colnames]\datatable{#4}
+\pgfplotstablegetelem{1}{nonsegmented}\of{\datatable}
+\pgfmathsetmacro{\foo}{\pgfplotsretval}
+\begin{tikzpicture}[] %[fixcentering]
+\begin{axis}[rwl-seg,
+        % width=10cm,
+        % height=8cm,
+%        y=1.5cm,
+%        xlabel={[number of segments][segment size]},
+	xlabel={dataset},
+        ylabel={runtime (ms)},
+        x label style={
+          at={(axis description cs:0.5,-0.17)},
+          anchor=north,
+        },
+        %xtick=data,
+        xtick={0,1,...,#3},
+        % not possible to set xticklabel styles :(
+        xticklabels from table={#5}{label},
+        xmin=-1,
+        xmax={#3+1},
+        ymin=0,
+        ymax=#1,
+        restrict y to domain=0:#2,
+%        ytick={1,10,100,200},
+        minor y tick num=1,
+        %bar width=20pt,
+        %xtick={0,1,...,3},
+        xtick pos=left,
+        ytick pos=left,
+%	ybar,
+        ymajorgrids,
+        %yminorgrids,
+        minor xtick={0,2,...,#3},
+        xminorgrids,
+%        xmajorgrids,
+%        xminorgrids,
+%        x major grid style={gray!5},
+%        minor x tick num=0.5,
+%        title={Avg time for 1 timestep},
+%        bar width=12pt,
+%        legend columns=2,
+        legend pos=north east,
+        legend style={
+          legend cell align=left,
+          font=\footnotesize,
+        },
+%        cycle list name=exotic,
+        colorbrewer cycle list=Set1-rwl,
+]
+%domain=\xmin:\xmax
+%\addplot+ [color=orange,mark=,line width=2pt,domain=-10:\xmax] table [y=nonsegmented] {\datatable};
+\addplot+ [color=orange,mark=,line width=2pt,domain=\xmin:\xmax] {\foo};
+\addlegendentry{Non-segmented};
+\pgfplotsset{cycle list shift=-1}
+\addplot+ table [y=segmentedlarge, x expr=\coordindex] {\datatable};
+\addlegendentry{Large segments};
+\addplot+ table [y=segmentedsmall, x expr=\coordindex] {\datatable};
+\addlegendentry{Small segments};
+\addplot+ table [y=segmentedmapwithloop, x expr=\coordindex] {\datatable};
+\addlegendentry{Sequential segments};
+\addplot+ table [y=segmentedscan, x expr=\coordindex] {\datatable};
+\addlegendentry{Segmented scan};
+\end{axis}
+\end{tikzpicture}
+}
+
+\pgfplotsset{
+  /pgf/number format/fixed zerofill=true,
+}
+
+\rwlplotb{5}{20}{9}{raw/2pow18_sum_groupsize_128}{\perflabelstwenty}
+\rwlplotb{5}{20}{9}{raw/2pow18_sum_groupsize_512}{\perflabelstwenty}
+\rwlplotb{5}{20}{9}{raw/2pow18_sum_groupsize_1024}{\perflabelstwenty}
+
+
+\pgfplotsset{
+  /pgf/number format/fixed zerofill=false,
+}
+
+\rwlplotb{40}{100}{13}{raw/2pow26_sum_groupsize_128}{\perflabelstwentysix}
+\rwlplotb{40}{100}{13}{raw/2pow26_sum_groupsize_512}{\perflabelstwentysix}
+\rwlplotb{40}{100}{13}{raw/2pow26_sum_groupsize_1024}{\perflabelstwentysix}
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

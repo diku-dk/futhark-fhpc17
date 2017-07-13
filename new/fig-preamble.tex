@@ -1,0 +1,246 @@
+\usepackage{tikz}
+\usetikzlibrary{calc, arrows, decorations.markings}
+
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.13}
+
+\usepackage{ifthen}
+
+\input{tikzlibrarypgfplots.colorbrewer.code}
+
+\tikzset{
+    fixcentering/.append style={
+        execute at end picture={
+          \path[use as bounding box]
+            let
+              \p1=(current bounding box.south west),
+              \p2=(current bounding box.north east)
+            in
+              (\x1,\y1) -- (\x2 - \x1, \y2);
+        }
+    }
+}
+
+\pgfplotsset{
+  rwl-all/.style={
+    % grid styles
+    minor grid style={gray!10},
+    major grid style={gray!50},
+    colorbrewer cycle list=Set1-rwl,
+    % y-labels
+    scaled y ticks = false,
+    yticklabel style={
+      /pgf/number format/precision=1,
+      /pgf/number format/fixed,
+%      /pgf/number format/fixed zerofill=true,
+    },
+    % Don't use comma for tousand separator
+%    /pgf/number format/1000 sep={},
+  },
+  rwl-seg/.style={
+    rwl-all,
+    % slanted x-labels
+    xticklabel style={
+      anchor=north west,
+      align=left,
+      rotate=-45,
+      font=\footnotesize,
+      inner sep=0,
+    },
+  }
+}
+
+\newcommand \xmin {\pgfkeysvalueof{/pgfplots/xmin}}
+\newcommand \xmax {\pgfkeysvalueof{/pgfplots/xmax}}
+\newcommand \ymin {\pgfkeysvalueof{/pgfplots/ymin}}
+\newcommand \ymax {\pgfkeysvalueof{/pgfplots/ymax}}
+
+\pgfplotstableread{
+row label
+0 $[2^{0}][2^{26}]$
+2 $[2^{2}][2^{24}]$
+4 $[2^{4}][2^{22}]$
+6 $[2^{6}][2^{20}]$
+8 $[2^{8}][2^{18}]$
+10 $[2^{10}][2^{16}]$
+12 $[2^{12}][2^{14}]$
+14 $[2^{14}][2^{12}]$
+16 $[2^{16}][2^{10}]$
+18 $[2^{18}][2^{8}]$
+20 $[2^{20}][2^{6}]$
+22 $[2^{22}][2^{4}]$
+24 $[2^{24}][2^{2}]$
+26 $[2^{26}][2^{0}]$
+}\perflabelstwentysix
+
+\pgfplotstableread{
+row label
+0 $[2^{0}][2^{18}]$
+2 $[2^{2}][2^{16}]$
+4 $[2^{4}][2^{14}]$
+6 $[2^{6}][2^{12}]$
+8 $[2^{8}][2^{10}]$
+10 $[2^{10}][2^{8}]$
+12 $[2^{12}][2^{6}]$
+14 $[2^{14}][2^{4}]$
+16 $[2^{16}][2^{2}]$
+18 $[2^{18}][2^{0}]$
+}\perflabelstwenty
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% #1 = ymax
+% #2 = yrestrict (cutoff)
+% #3 = size of performance test
+% #4 = data table
+% #5 = table containing labels
+\newcommand{\rwlplotauto}[5]{
+\pgfplotstabletranspose[colnames from=colnames]\datatable{#4}
+\pgfplotstablegetelem{1}{nonsegmented}\of{\datatable}
+\pgfmathsetmacro{\foo}{\pgfplotsretval}
+\begin{tikzpicture}[] %[fixcentering]
+\begin{axis}[rwl-seg,
+        % width=10cm,
+        % height=8cm,
+%        y=1.5cm,
+%        xlabel={[number of segments][segment size]},
+	xlabel={dataset},
+        ylabel={runtime (ms)},
+        x label style={
+          at={(axis description cs:0.5,-0.17)},
+          anchor=north,
+        },
+        %xtick=data,
+        xtick={0,1,...,#3},
+        % not possible to set xticklabel styles :(
+        xticklabels from table={#5}{label},
+        xmin=-1,
+        xmax={#3+1},
+        ymin=0,
+        ymax=#1,
+        restrict y to domain=0:#2,
+%        ytick={1,10,100,200},
+        minor y tick num=1,
+        %bar width=20pt,
+        %xtick={0,1,...,3},
+        xtick pos=left,
+        ytick pos=left,
+%	ybar,
+        ymajorgrids,
+        %yminorgrids,
+        minor xtick={0,2,...,#3},
+        xminorgrids,
+%        xmajorgrids,
+%        xminorgrids,
+%        x major grid style={gray!5},
+%        minor x tick num=0.5,
+%        title={Avg time for 1 timestep},
+%        bar width=12pt,
+        legend columns=2,
+        legend pos=north east,
+        legend style={
+          legend cell align=left,
+          font=\footnotesize,
+        },
+%        cycle list name=exotic,
+        colorbrewer cycle list=Set1-rwl,
+]
+%domain=\xmin:\xmax
+%\addplot+ [color=orange,mark=,line width=2pt,domain=-10:\xmax] table [y=nonsegmented] {\datatable};
+\addplot+ [color=orange,mark=,line width=2pt,domain=\xmin:\xmax] {\foo};
+\addlegendentry{Non-segmented};
+\pgfplotsset{cycle list shift=-1}
+\addplot+ table [y=segmentedlarge, x expr=\coordindex] {\datatable};
+\addlegendentry{Large segments};
+\addplot+ table [y=segmentedsmall, x expr=\coordindex] {\datatable};
+\addlegendentry{Small segments};
+\addplot+ table [y=segmentedmapwithloop, x expr=\coordindex] {\datatable};
+\addlegendentry{Sequential segments};
+\addplot+ table [y=segmentedscan, x expr=\coordindex] {\datatable};
+\addlegendentry{Segmented scan};
+\pgfplotsset{cycle list shift=1}
+%\addplot+ [mark=*, mark options={fill=orange, fill opacity=0.25}] table [y=segmentedauto, x expr=\coordindex] {\datatable};
+%\addplot+ [mark=diamond*, mark size=2, mark options={draw=black}, only marks] table [y=segmentedauto, x expr=\coordindex] {\datatable};
+\addplot+ [mark=o, mark size=4, mark options={draw=black, line width=0.6pt}, only marks] table [y=segmentedauto, x expr=\coordindex] {\datatable};
+\addlegendentry{Automatic};
+\end{axis}
+\end{tikzpicture}
+}
+
+
+% #1 = ymax
+% #2 = yrestrict (cutoff)
+% #3 = size of performance test
+% #4 = data table
+% #5 = table containing labels
+\newcommand{\rwlplotautoandcub}[5]{
+\pgfplotstabletranspose[colnames from=colnames]\datatable{#4}
+\pgfplotstablegetelem{1}{nonsegmented}\of{\datatable}
+\pgfmathsetmacro{\foo}{\pgfplotsretval}
+\begin{tikzpicture}[] %[fixcentering]
+\begin{axis}[rwl-seg,
+        % width=10cm,
+        % height=8cm,
+%        y=1.5cm,
+%        xlabel={[number of segments][segment size]},
+	xlabel={dataset},
+        ylabel={runtime (ms)},
+        x label style={
+          at={(axis description cs:0.5,-0.17)},
+          anchor=north,
+        },
+        %xtick=data,
+        xtick={0,1,...,#3},
+        % not possible to set xticklabel styles :(
+        xticklabels from table={#5}{label},
+        xmin=-1,
+        xmax={#3+1},
+        ymin=0,
+        ymax=#1,
+        restrict y to domain=0:#2,
+%        ytick={1,10,100,200},
+        minor y tick num=1,
+        %bar width=20pt,
+        %xtick={0,1,...,3},
+        xtick pos=left,
+        ytick pos=left,
+%	ybar,
+        ymajorgrids,
+        %yminorgrids,
+        minor xtick={0,2,...,#3},
+        xminorgrids,
+%        xmajorgrids,
+%        xminorgrids,
+%        x major grid style={gray!5},
+%        minor x tick num=0.5,
+%        title={Avg time for 1 timestep},
+%        bar width=12pt,
+        legend pos=north east,
+        legend style={
+          legend cell align=left,
+          font=\footnotesize,
+        },
+%        cycle list name=exotic,
+        colorbrewer cycle list=Set1-rwl,
+]
+%domain=\xmin:\xmax
+%\addplot+ [color=orange,mark=,line width=2pt,domain=-10:\xmax] table [y=nonsegmented] {\datatable};
+\addplot+ [color=orange,mark=,line width=2pt,domain=\xmin:\xmax] {\foo};
+\addlegendentry{Non-segmented};
+\pgfplotsset{cycle list shift=-1}
+\addplot+ table [y=segmentedlarge, x expr=\coordindex] {\datatable};
+\addlegendentry{Large segments};
+\addplot+ table [y=segmentedsmall, x expr=\coordindex] {\datatable};
+\addlegendentry{Small segments};
+\addplot+ table [y=segmentedmapwithloop, x expr=\coordindex] {\datatable};
+\addlegendentry{Sequential segments};
+\addplot+ table [y=segmentedscan, x expr=\coordindex] {\datatable};
+\addlegendentry{Segmented scan};
+\addplot+ table [y=segmentedauto, x expr=\coordindex] {\datatable};
+\addlegendentry{Automatic};
+\addplot+ table [y=segmentedcub, x expr=\coordindex] {\datatable};
+\addlegendentry{CUB};
+\end{axis}
+\end{tikzpicture}
+}
