@@ -6,14 +6,15 @@
 
 set -e
 
-benchmark=$1
+data=$1
+benchmark=$2
 
 generate() {
     k=$1
     logsegments=0
     while [ $logsegments -le $k ]; do
         logsegsize=$(($k-$logsegments))
-        echo -n "\"inputs/i32_2pow${logsegments}_2pow${logsegsize}\":\""
+        echo -n "\"inputs/${data}_2pow${logsegments}_2pow${logsegsize}\":\""
         cub/$benchmark $logsegments $logsegsize || echo "Failed" >&2
         echo "\","
         logsegments=$(($logsegments + 2))

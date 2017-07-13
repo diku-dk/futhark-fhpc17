@@ -5,7 +5,7 @@ CUB_PATH?=$(HOME)/cub-1.7.0
 
 .SECONDARY:
 
-all: bin/futhark-opencl benchmarks/inputs sum_results mss_results index_of_max_results blackscholes_results results/cub
+all: bin/futhark-opencl benchmarks/inputs sum_results mss_results index_of_max_results blackscholes_results results/sum_segmented_cub.json results/index_of_max_segmented_cub.json results/blackscholes_segmented_cub.json
 
 # For sum we want to try three different workgroup sizes; the others
 # will have to make do with 512.
@@ -38,15 +38,21 @@ benchmarks/data:
 
 
 results/sum_segmented_cub.json: cub/sum_segmented cub.sh
-	./cub.sh sum_segmented
+	./cub.sh i32 sum_segmented
 
 cub/sum_segmented: cub/sum_segmented.cu
 	nvcc -o $@ $< -O3 -I$(CUB_PATH)
 
 results/index_of_max_segmented_cub.json: cub/index_of_max_segmented cub.sh
-	./cub.sh index_of_max_segmented
+	./cub.sh i32 index_of_max_segmented
 
 cub/index_of_max_segmented: cub/index_of_max_segmented.cu
+	nvcc -o $@ $< -O3 -I$(CUB_PATH)
+
+results/blackscholes_segmented_cub.json: cub/blackscholes_segmented cub.sh
+	./cub.sh blackscholes blackscholes_segmented
+
+cub/blackscholes_segmented: cub/blackscholes_segmented.cu
 	nvcc -o $@ $< -O3 -I$(CUB_PATH)
 
 clean:
