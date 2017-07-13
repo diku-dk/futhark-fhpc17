@@ -1,0 +1,114 @@
+\documentclass[crop,tikz]{standalone}
+
+\input{fig-preamble}
+
+
+\pgfplotstableread{
+benchmark rodinia old new
+{Backprop\\(1048576)}  52.065  29.276  21.456
+{K-means\\(204800)}   733.786 993.759 575.838
+{K-means\\(kdd\_cup)} 1484.170 896.763 688.444
+}\benchmarkresults
+
+
+\begin{document}
+
+\pgfplotsset{
+  rwlerrorbars/.style={
+    error bars/y dir=both,
+    error bars/y explicit,
+    error bars/error mark=|,
+    error bars/error mark options={
+      draw=black,
+    }
+  },
+}
+
+\newcommand{\rwltime}[2]{
+\begin{tikzpicture}[fixcentering]
+  \begin{axis}[rwl-all,
+%        title={#2},
+        % width=12cm,
+        height=7cm,
+        xlabel={Benchmark},
+        ylabel={runtime (ms)},
+        x label style={at={(axis description cs:0.5,-0.15)},anchor=north,},
+        xticklabels from table={#2}{benchmark},
+        xtick=data,
+%         xmin=-1,
+%         xmax=4,
+        ymin=0,
+        ymax=#1,
+% %        restrict y to domain*=\ymin:#1,
+%        ytick={0,2,...,\ymax},
+%        extra y ticks={#1},
+        minor y tick num=1,
+% %        ytick={0,20,40,60,80},
+% %        yticklabel={\pgfmathprintnumber\tick\%},
+%         %yticklabel style={
+%         %  /pgf/number format/precision=3,
+%         %  /pgf/number format/fixed,
+%         %},
+         xtick pos=left,
+         ytick pos=left,
+         ymajorgrids,
+         yminorgrids,
+         ybar,
+% %        bar width=8pt,
+% % Can use absolute value, doesn't require change for different xmax values
+         bar width=0.20,
+% %        bar width=20pt,
+         enlarge x limits={abs=0.6},
+         legend pos=north west,
+         legend style={legend cell align=left, font=\footnotesize},
+%         % nodes near coords displays value on top
+        nodes near coords,
+        every node near coord/.append style={
+          font=\scriptsize,
+          fill=white,
+%          rotate=90,
+%          anchor=west,
+          inner sep=0pt,
+          outer sep=3pt,
+%          text=colorbrewer1!70,
+        },
+        colorbrewer cycle list=Set1-rwl,
+        xticklabel style={
+%          anchor=north west,
+%          rotate=-45,
+          align=left,
+          font=\scriptsize,
+          inner sep=1pt,
+        },
+        % Some voodo magic to not display too many digits
+        /pgf/number format/fixed,
+%        /pgf/number format/fixed zerofill=true,
+%        /pgf/number format/fixed relative,
+        /pgf/number format/precision=0,
+        ]
+%\pgfplotsset{cycle list shift=2}
+\addplot+ [area legend,fill,mark=,draw=black,thin] table [y=rodinia, x expr=\coordindex] {#2};
+\addlegendentry{Rodinia};
+\addplot+ [area legend,fill,mark=,draw=black,thin] table [y=old, x expr=\coordindex] {#2};
+\addlegendentry{Segmented Scans};
+\addplot+ [area legend,fill,mark=,draw=black,thin] table [y=new, x expr=\coordindex] {#2};
+\addlegendentry{Segmented Reductions};
+%\addplot+ [rwlerrorbars, area legend,fill,mark=,draw=black,thin] table [y=b_mean, y error=b_std, x expr=\coordindex] {#2};
+%\addlegendentry{thesis};
+% \addplot+ [rwlerrorbars, area legend,fill,mark=,draw=black,thin] table [y=a_mean, y error=a_std, x expr=\coordindex] {#3};
+% \addlegendentry{vanilla+vc};
+% \addplot+ [rwlerrorbars, area legend,fill,mark=,draw=black,thin] table [y=b_mean, y error=b_std, x expr=\coordindex] {#3};
+% \addlegendentry{thesis+vc};
+\end{axis}
+\end{tikzpicture}
+}
+
+\rwltime{1700}{\benchmarkresults}
+
+\end{document}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
