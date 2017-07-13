@@ -62,7 +62,7 @@ rsms_seen = set()
 
 def rsms_write(group_size, benchmark, work_name, work_list, xs, ys, row_name):
     row_name = row_name.replace('_', '')
-    path = 'new/raw/{}_{}_groupsize_{}'.format(work, benchmark, group_size)
+    path = 'new-figures/raw/{}_{}_groupsize_{}'.format(work, benchmark, group_size)
 
     num_items = len(work_list)
 
