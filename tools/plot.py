@@ -58,6 +58,34 @@ def ylimit(benchmark, work, ylims):
         ylims.sort()
         return ylims[-2]*1.2
 
+rsms_seen = set()
+
+def rsms_write(group_size, benchmark, work_name, work_list, xs, ys, row_name):
+    row_name = row_name.replace('_', '')
+    path = 'new/raw/{}_{}_groupsize_{}'.format(work, benchmark, group_size)
+
+    num_items = len(work_list)
+
+    if path not in rsms_seen:
+        rsms_seen.add(path)
+        f = open(path, 'w')
+        f.write('colnames ')
+        f.write(' '.join(map(str, range(num_items))))
+        f.write('\n')
+    else:
+        f = open(path, 'a')
+
+    num_missing = num_items - len(ys)
+    if row_name == 'segmentedlarge':
+        ys = ys[:] + ([-1] * num_missing)
+    else:
+        ys = ([-1] * num_missing) + ys[:]
+
+    f.write('{} '.format(row_name))
+    f.write(' '.join(map(str, ys)))
+    f.write('\n')
+    f.close()
+
 for group_size in [128, 512, 1024]:
     for benchmark, benchmark_name, benchmark_data, benchmark_data_sets in benchmarks:
         for work in benchmark_data_sets:
@@ -90,6 +118,7 @@ for group_size in [128, 512, 1024]:
                 ys += [ms]
                 i += 1
             ax.plot(xs,ys,label='Non-segmented',marker='',linewidth=3,color='black',ls='dashed')
+            rsms_write(group_size, benchmark, work, benchmark_data_sets[work], xs, ys, 'nonsegmented')
 
             # Now add the segmented runtimes.
             ylims=[]
@@ -111,6 +140,7 @@ for group_size in [128, 512, 1024]:
                     i += 1
                 ylims += [np.max(ys)]
                 ax.plot(xs,ys,label=variant_desc,marker=marker,linewidth=3,markersize=15)
+                rsms_write(group_size, benchmark, work, benchmark_data_sets[work], xs, ys, variant)
 
             grey='#aaaaaa'
 
