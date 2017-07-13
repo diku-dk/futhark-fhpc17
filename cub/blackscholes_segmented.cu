@@ -204,24 +204,17 @@ int main(int argc, char** argv) {
   static const int num_runs = 100;
   int total_us = 0;
 
-  // We re-allocate memory for the output and intermediary arrays,
-  // because that is also what the Futhark-generated code does
-  // (including the computation of how much to allocate).
+  size_t temp_storage_bytes = 0;
+  cudaSucceeded(cub::DeviceSegmentedReduce::Sum
+                (d_temp_storage, temp_storage_bytes,
+                 make_option(0, d_rs, d_vs, segment_size), d_out,
+                 num_segments,
+                 d_offsets, d_offsets + 1));
+  cudaSucceeded(cudaMalloc(&d_out, num_segments*sizeof(int)));
+  cudaSucceeded(cudaMalloc(&d_temp_storage, temp_storage_bytes));
+
   for (int i = 0; i < num_runs; i++) {
-    cudaSucceeded(cudaFree(d_out));
-    cudaSucceeded(cudaFree(d_temp_storage));
-
     start_timing();
-    cudaSucceeded(cudaMalloc(&d_out, num_segments*sizeof(int)));
-
-    size_t temp_storage_bytes = 0;
-    cudaSucceeded(cub::DeviceSegmentedReduce::Sum
-                  (d_temp_storage, temp_storage_bytes,
-                   make_option(0, d_rs, d_vs, segment_size), d_out,
-                   num_segments,
-                   d_offsets, d_offsets + 1));
-
-    cudaSucceeded(cudaMalloc(&d_temp_storage, temp_storage_bytes));
 
     cudaSucceeded(cub::DeviceSegmentedReduce::Sum
                   (d_temp_storage, temp_storage_bytes,
