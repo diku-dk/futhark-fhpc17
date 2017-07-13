@@ -76,7 +76,7 @@ def rsms_write(group_size, benchmark, work_name, work_list, xs, ys, row_name):
         f = open(path, 'a')
 
     num_missing = num_items - len(ys)
-    if row_name == 'segmentedlarge':
+    if row_name in ['segmentedlarge', 'segmentedcub']:
         ys = ys[:] + ([-1] * num_missing)
     else:
         ys = ([-1] * num_missing) + ys[:]

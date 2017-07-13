@@ -105,7 +105,7 @@ row label
         % height=8cm,
 %        y=1.5cm,
 %        xlabel={[number of segments][segment size]},
-	xlabel={dataset},
+	xlabel={Data set},
         ylabel={runtime (ms)},
         x label style={
           at={(axis description cs:0.5,-0.17)},
@@ -184,7 +184,7 @@ row label
         % height=8cm,
 %        y=1.5cm,
 %        xlabel={[number of segments][segment size]},
-	xlabel={dataset},
+	xlabel={Data set},
         ylabel={runtime (ms)},
         x label style={
           at={(axis description cs:0.5,-0.17)},
@@ -216,6 +216,7 @@ row label
 %        minor x tick num=0.5,
 %        title={Avg time for 1 timestep},
 %        bar width=12pt,
+        legend columns=2,
         legend pos=north east,
         legend style={
           legend cell align=left,
@@ -237,9 +238,12 @@ row label
 \addlegendentry{Sequential segments};
 \addplot+ table [y=segmentedscan, x expr=\coordindex] {\datatable};
 \addlegendentry{Segmented scan};
-\addplot+ table [y=segmentedauto, x expr=\coordindex] {\datatable};
+%\addplot+ [mark=*, mark options={fill=orange, fill opacity=0.25}] table [y=segmentedauto, x expr=\coordindex] {\datatable};
+%\addplot+ [mark=diamond*, mark size=2, mark options={draw=black}, only marks] table [y=segmentedauto, x expr=\coordindex] {\datatable};
+\addplot+ [mark=o, mark size=4, mark options={draw=black, line width=0.6pt}, only marks] table [y=segmentedauto, x expr=\coordindex] {\datatable};
 \addlegendentry{Automatic};
-\addplot+ table [y=segmentedcub, x expr=\coordindex] {\datatable};
+\pgfplotsset{cycle list shift=0}
+\addplot+ [mark=diamond*, mark options={fill=white}] table [y=segmentedcub, x expr=\coordindex] {\datatable};
 \addlegendentry{CUB};
 \end{axis}
 \end{tikzpicture}
