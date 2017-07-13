@@ -172,3 +172,5 @@ for benchmark, benchmark_name, benchmark_data, benchmark_data_sets in benchmarks
 
             plt.rc('text')
             plt.savefig(filename, bbox_inches='tight')
+
+# for f in *.tex; do pdflatex -halt-on-error $f; done
