@@ -77,7 +77,7 @@ module blackscholes = {
 
   let redop (x: f64) (y: f64) = x + y
 
-  let ne = 0.
+  let ne = 0.0
 }
 
 let blackscholes (r: f64) (v: f64) (days: i32): f64 =
