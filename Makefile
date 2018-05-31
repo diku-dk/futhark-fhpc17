@@ -15,10 +15,10 @@ sum_results: bin/futhark-opencl benchmarks/sum_expected
 %_results: bin/futhark-opencl benchmarks/%_expected
 	./mkbench.sh $* 512
 
-benchmarks/blackscholes_expected:
+benchmarks/blackscholes_expected: bin/futhark-opencl
 	./mkresults.sh blackscholes blackscholes || (rm -rf benchmarks/blackscholes_expected && false)
 
-benchmarks/%_expected:
+benchmarks/%_expected: bin/futhark-opencl
 	./mkresults.sh $* i32 || (rm -rf benchmarks/$*_expected && false)
 
 bin/futhark-opencl: futhark-patched
@@ -26,6 +26,7 @@ bin/futhark-opencl: futhark-patched
 	cd futhark-patched && stack setup
 	cd futhark-patched && stack build
 	cp `cd futhark-patched && stack exec which futhark-opencl` bin/futhark-opencl
+	cp `cd futhark-patched && stack exec which futhark-c` bin/futhark-c
 	cp `cd futhark-patched && stack exec which futhark` bin/futhark
 
 futhark-patched:

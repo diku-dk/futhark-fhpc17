@@ -5,8 +5,8 @@ set -e
 benchmark=$1
 data=$2
 
-futhark-c benchmarks/${benchmark}.fut
-futhark-c benchmarks/${benchmark}_segmented.fut
+bin/futhark-c benchmarks/${benchmark}.fut
+bin/futhark-c benchmarks/${benchmark}_segmented.fut
 
 mkdir -p benchmarks/${benchmark}_expected
 
