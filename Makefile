@@ -29,13 +29,12 @@ bin/futhark-opencl: futhark-patched
 	cp `cd futhark-patched && stack exec which futhark` bin/futhark
 
 futhark-patched:
-	git clone --depth 1 https://github.com/HIPERFIT/futhark futhark-patched
-	cd futhark-patched && patch -p 1 -u < ../futhark-instrumentation.patch
+	git clone https://github.com/HIPERFIT/futhark futhark-patched
+	cd futhark-patched && git checkout f6049bf4b666847c4e9c46cccda7e4a72f39c492 && patch -p 1 -u < ../futhark-instrumentation.patch
 
-benchmarks/data:
-	mkdir -p benchmarks/data
-	./mkdata.sh || rm -rf benchmarks/data
-
+benchmarks/inputs:
+	mkdir -p benchmarks/inputs
+	./mkdata.sh || rm -rf benchmarks/inputs
 
 results/sum_segmented_cub.json: cub/sum_segmented cub.sh
 	./cub.sh i32 sum_segmented
